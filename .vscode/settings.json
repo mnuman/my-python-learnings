@@ -1,0 +1,15 @@
+{
+    "python.pythonPath": "/home/milco/pydev/bin/python",
+    "python.linting.pylintUseMinimalCheckers": false,
+    "python.formatting.provider": "autopep8",
+    "editor.formatOnSave": false,
+    "editor.fontSize": 12,
+    "python.unitTest.pyTestArgs": [
+        "--exitfirst",
+        "--verbose",        
+        "aoc-2017"
+    ],
+    "python.unitTest.unittestEnabled": false,
+    "python.unitTest.nosetestsEnabled": false,
+    "python.unitTest.pyTestEnabled": true
+}

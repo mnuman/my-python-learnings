@@ -12,7 +12,7 @@ import day1
 91212129 produces 9 because the only digit that matches the next one is the last digit, 9.
 """
 class Day1Test(unittest.TestCase):
-
+    """Testcases for day1 module"""
     def test_1122(self):
         self.assertEqual(day1.day1('1122'), 3)
 
