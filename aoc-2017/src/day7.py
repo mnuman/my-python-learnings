@@ -64,5 +64,42 @@ holding up any other programs, and are all the tops of their own towers.,
 
 Before you're ready to help them, you need to make sure your information,
 is correct. What is the name of the bottom program?"""
+import os
+import re
+
+def readfile(filename):
+    """Read file and return as a list of lines"""
+    with open(filename, "r") as the_file:
+        lines = the_file.readlines()
+    return [l for l in lines]
+
+def parse_data_7(lines):
+    """Process the array of lines into dictionary where every node points to its parent"""
+    lineregex = re.compile(r'^([a-z]*) \(([0-9]*)\) \-> (.*)')
+    parent = {}
+    # matches: 0 - node, 1 - weight, 2: list of children
+    for line in lines:
+        match = lineregex.match(line)
+        if match is not None:
+            nodes = match.groups()
+            if len(nodes) == 3:
+                # for now, just consider the parent
+                for child in [c.strip() for c in nodes[2].split(',') if c != ',']:
+                    parent[child] = nodes[0]
+    return parent
+
+def find_root(parents):
+    """ Given a dictionary where each child is a key and its value is its parent,
+        we determine the single element which does not have a parent.
+        By definition, this is the tree's root.
+    """
+    roots = set([parents[n] for n in parents if parents[n] not in parents])
+    assert len(roots) == 1
+    return roots.pop()
+
+
 if __name__ == '__main__':
-    pass
+    lines = readfile(os.path.join(os.path.dirname(__file__), 'day7.txt'))
+    parents = parse_data_7(lines)
+    print(find_root(parents))
+    # 7a: eugwuhl
