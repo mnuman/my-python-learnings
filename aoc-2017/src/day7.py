@@ -67,6 +67,92 @@ is correct. What is the name of the bottom program?"""
 import os
 import re
 
+class Node():
+    """Class to hold the Node object for building a tree"""
+    def __init__(self, name, weight, children):
+        self.name = name
+        self.weight = weight
+        self.children = [c for c in children if len(c) > 0]
+        self.parent = None
+        self.subtreeweight = None
+
+def parse_data_7b(lines):
+    """Process the array of lines into dictionary where every node points to its parent"""
+    lineregex = re.compile(r'^(\w*) \((\d*)\) ?(?:\->)? ?(.*)')
+    all_nodes = {}
+    # matches: 0 - node, 1 - weight, 2: list of children
+    for line in lines:
+        match = lineregex.match(line)
+        nodes = match.groups()
+        n = Node(nodes[0], int(nodes[1]), [c.strip() for c in nodes[2].split(',') if c != ','])
+        all_nodes[n.name] = n
+    return all_nodes
+
+def build_tree(nodeDict):
+    """Add parent to each child node"""
+    for node in nodeDict:
+        current_node = nodeDict[node]
+        if current_node.children is not None:
+            for child in current_node.children:
+                nodeDict[child].parent = current_node
+    return nodeDict
+
+def find_tree_root(nodeDict):
+    """Find the tree root by starting with the first key
+       and inspecting its parent until we find a node
+       without a parent - by definition that is the root
+    """
+    node = nodeDict[list(nodeDict.keys())[0]]
+    while (node is not None and node.parent is not None):
+        node = node.parent
+    return node
+
+
+def weigh_subtree(nodeDict, node):
+    """Calculate the weight of the subtree by summing the node's
+       weight plus the weights of its children.
+       """
+    node.subtreeweight = node.weight + sum(
+        weigh_subtree(nodeDict, nodeDict[c]) for c in node.children)
+    return node.subtreeweight
+
+def weighted_tree(nodeDict):
+    """This is the man that performs the top-down recursive weight calculation on the tree"""
+    root = find_tree_root(nodeDict)
+    weigh_subtree(nodeDict, root)
+    return nodeDict
+
+def find_unbalanced_node(nodeDict):
+    """Return the unbalanced node, i.e. the one where the children
+    have different subtree weights.
+    Returns a tuple of: name of unbalanced node, my weight, their weights
+    and the correct weight for the node
+    """
+    nodeDict = build_tree(nodeDict)
+    nodeDict = weighted_tree(nodeDict)
+
+    for nodeKey in nodeDict:
+        subtreeweights = {}
+        for c in nodeDict[nodeKey].children:
+            if nodeDict[c].subtreeweight in subtreeweights:
+                subtreeweights[nodeDict[c].subtreeweight].append(c)
+            else:
+                subtreeweights[nodeDict[c].subtreeweight] = [c]
+            for k in subtreeweights:
+                if len(subtreeweights) > 1 and len(subtreeweights[k]) == 1:
+                    offendingChild = nodeDict[subtreeweights[k][0]]
+                    childWeight = offendingChild.subtreeweight
+                    parentNode = offendingChild.parent
+                    for childkey in parentNode.children:
+                        if nodeDict[childkey].subtreeweight != childWeight:
+                            print(subtreeweights)
+                            return offendingChild.name, childWeight, \
+                                    nodeDict[childkey].subtreeweight, \
+                                    offendingChild.weight - \
+                                    childWeight + \
+                                    nodeDict[childkey].subtreeweight
+
+
 def readfile(filename):
     """Read file and return as a list of lines"""
     with open(filename, "r") as the_file:
@@ -97,9 +183,12 @@ def find_root(parents):
     assert len(roots) == 1
     return roots.pop()
 
-
-if __name__ == '__main__':
+# lines = readfile(os.path.join(os.path.dirname(__file__), 'day7.txt'))
+# parents = parse_data_7(lines)
+# print(find_root(parents))
+# # 7a: eugwuhl
+if __name__ =='__main__':
     lines = readfile(os.path.join(os.path.dirname(__file__), 'day7.txt'))
-    parents = parse_data_7(lines)
-    print(find_root(parents))
-    # 7a: eugwuhl
+    all_nodes = parse_data_7b(lines)
+    r = find_unbalanced_node(all_nodes)
+    print(f'Unbalanced node: {r[0]}, current-weight: {r[1]}, ideal weight: {r[2]}, node-weight: {r[3]}')
