@@ -1,0 +1,6 @@
+smi inc 781 if epx > -2
+yrf dec -813 if jzm != 6
+ben dec -383 if sp == 0
+tlj dec -356 if sp <= 4
+ssv dec -128 if tlj <= 360
+vlh dec -978 if ih == 0
