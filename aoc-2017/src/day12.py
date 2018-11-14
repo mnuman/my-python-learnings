@@ -85,9 +85,24 @@ def reachability(graph, node, seen=None):
     final_result = list(reached)
     return final_result
 
+def R(G,s,A):
+    """ Code golf solution! https://codegolf.stackexchange.com/questions/26031/find-all-reachable-nodes-in-a-graph"""
+    A|={s}
+    for n in set(G[s])-A:R(G,n,A)
+
 if __name__ == '__main__':
     NODES = readfile(os.path.join(os.path.dirname(__file__), 'day12.txt'))
-    print(NODES['0'])
-    x=reachable(NODES, '0')
-    print(x)
-# 153
+    
+    groupSet = set()
+    # brute force: just iterate over all nodes to collect the 
+    # sorted list of reachable nodes for every node without
+    # considering whether the current node of interest already
+    # occurs as one of the reachable nodes for another node.
+    # In that case the group is already known ...
+    for node in NODES:
+        A=set()
+        R(NODES, node, A)
+        groupSet.add(tuple(sorted(A)))
+    print(len(groupSet))
+    # 12: 145
+    # 12b: 207
