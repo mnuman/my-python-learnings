@@ -1,4 +1,5 @@
 """Functions for Advent of Code 2017, day 13"""
+import os
 
 
 class Layer():
@@ -29,6 +30,15 @@ class Layer():
 
 
 class Firewall():
+    """ Classs representation of the firewall; the class
+        need to be passed an array of Layer object on creation
+        and exposes the required move_scanner, move_packet and 
+        the operation combining the two, cycle.
+        The score is exposed as packet score attribute.
+        TO DO: have not taken any precaution to hide attributes
+          and/or methods! Caveat emptor ...
+    """
+
     def __init__(self, layers):
         self.layers = layers
         self.packet_position = -1  # still outside firewall
@@ -74,3 +84,12 @@ def read_configuration(filename):
             firewall.append(Layer(None))
         firewall.append(Layer(depth))
     return Firewall(firewall)
+
+
+if __name__ == '__main__':
+    myfirewall = read_configuration(os.path.join(
+        os.path.dirname(__file__), 'day13_input.txt'))
+    while myfirewall.packet_position < len(myfirewall.layers):
+        myfirewall.cycle()
+    print(f"The final score is {myfirewall.packet_score}")
+# part1 solution = 1624
