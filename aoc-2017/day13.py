@@ -43,6 +43,19 @@ class Firewall():
         self.layers = layers
         self.packet_position = -1  # still outside firewall
         self.packet_score = 0
+        self.caught = False
+
+    def reset(self, delay):
+        """Reset the firewall to its original state and move the 
+        packet to a specific starting position by providing a delay.
+        """
+        self.packet_position = -(delay + 1)  # undelayed starts at -1
+        self.packet_score = 0
+        self.caught = False
+        for l in self.layers:
+            if l.depth is not None:
+                l.offset = 1    # moving down
+                l.pos = 0  # start at original position
 
     def move_scanners(self):
         """Move all scanners one step"""
@@ -60,9 +73,9 @@ class Firewall():
            scanners.
         """
         self.move_packet()
-        if self.packet_position < len(self.layers):
+        if 0 <= self.packet_position < len(self.layers):
             if self.layers[self.packet_position].pos == 0:
-                # caught!
+                self.caught = True
                 self.packet_score += self.packet_position * \
                     self.layers[self.packet_position].depth
         self.move_scanners()
@@ -86,10 +99,31 @@ def read_configuration(filename):
     return Firewall(firewall)
 
 
+def solve(firewall):
+    """Iterate while no solution has been found, resetting the firewall
+    for each iteration and increasing the delay (packet offset).
+    """
+    offset = 0
+    solution_found = False
+
+    while not solution_found:
+        firewall.reset(offset)
+        while firewall.packet_position < len(firewall.layers) and not firewall.caught:
+            firewall.cycle()
+        solution_found = firewall.packet_score == 0 and not firewall.caught
+        if not solution_found:
+            # increase the packet offset if we have not found a solution ...
+            offset += 1
+            print(f"Testing solution with offset {offset}")
+    return offset
+
+
 if __name__ == '__main__':
     myfirewall = read_configuration(os.path.join(
         os.path.dirname(__file__), 'day13_input.txt'))
-    while myfirewall.packet_position < len(myfirewall.layers):
-        myfirewall.cycle()
-    print(f"The final score is {myfirewall.packet_score}")
-# part1 solution = 1624
+    # while myfirewall.packet_position < len(myfirewall.layers):
+    #     myfirewall.cycle()
+    # print(f"The final score is {myfirewall.packet_score}")
+    # part1 solution = 1624
+    solution_delay = solve(myfirewall)
+    print(f"Solved the firewall for offset = ${solution_delay}")

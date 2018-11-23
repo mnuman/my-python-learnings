@@ -58,6 +58,7 @@ def test_move():
 def test_pass_through():
     myfirewall = day13.read_configuration(os.path.join(
         os.path.dirname(__file__), 'day13_test.txt'))
+
     while myfirewall.packet_position < len(myfirewall.layers):
         myfirewall.cycle()
     # caught at layer 0 - depth 3 and layer 6 - depth 4
@@ -71,3 +72,11 @@ def test_pass_through_2():
         myfirewall.cycle()
     # caught at layer 0, 2, 4, 6, 8 all depth 2
     assert myfirewall.packet_score == (0 + 2 + 4 + 6 + 8) * 2
+
+
+def test_pass_solve():
+    myfirewall = day13.read_configuration(os.path.join(
+        os.path.dirname(__file__), 'day13_test.txt'))
+
+    delay = day13.solve(myfirewall)
+    assert delay == 10
